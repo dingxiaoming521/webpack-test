@@ -1,5 +1,6 @@
 const merge = require('webpack-merge');
 const path = require('path');
+const webpack = require('webpack');
 const common = require('./webpack.common.js');
 const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin'); //css优化处理
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin'); //js压缩处理
@@ -45,7 +46,7 @@ module.exports = merge(common, {
     splitChunks: {
       cacheGroups: {
         vendors: {
-          test: /[\\/]node_modules[\\/]/,
+          test: /node_modules/,
           name: 'vendors',
           minSize: 30000,
           minChunks: 1,
@@ -53,7 +54,7 @@ module.exports = merge(common, {
           priority: 1 // 该配置项是设置处理的优先级，数值越大越优先处理
         },
         commons: {
-          test: /[\\/]src[\\/]common[\\/]/,
+          test: /src[\\/]common/,
           name: 'commons',
           minSize: 30000,
           minChunks: 3,

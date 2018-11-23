@@ -2,7 +2,8 @@ const glob = require("glob");
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-
+// 拆分css样式的插件
+const ExtractTextWebpackPlugin = require('extract-text-webpack-plugin');
 let plugins = [];
 let htmlParams = {
   meta: { //生成meta标签
@@ -33,10 +34,11 @@ let entryObject = {};
       let fileFullName = fileFullPath.replace(/.*[\\\/]view[\\\/]/, "view/").replace(/\.html$/, "");
       let entryName = fileFullName.replace(/view/, "assets/js");
       entryObject[entryName] = fileFullPath.replace(/view/, "assets/js").replace(/html$/, "js");
-      htmlParams.chunks = [entryName];
+      
       // 输出文件
       htmlParams.filename = fileFullName + ".html";
       htmlParams.template = fileFullPath;
+      htmlParams.chunks = [entryName];
       plugins.push(new HtmlWebpackPlugin(htmlParams));
     });
   }
