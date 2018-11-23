@@ -3,8 +3,13 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // 拆分css样式的插件
-const ExtractTextWebpackPlugin = require('extract-text-webpack-plugin');
-let plugins = [];
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+let plugins = [
+  new MiniCssExtractPlugin({
+    filename: "[name].css",
+    chunkFilename: "[id].css"
+  })
+];
 let htmlParams = {
   meta: { //生成meta标签
     viewport: 'width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0',
@@ -26,19 +31,20 @@ let htmlParams = {
   inject: true,
   chunksSortMode: "manual",
 };
-let entryObject = {}; 
-{
+let entryObject = {
+
+}; {
   {
     const htmlSelector = path.resolve(__dirname, "dev") + "/**/*.html";
     glob.sync(htmlSelector).forEach(function(fileFullPath) {
       let fileFullName = fileFullPath.replace(/.*[\\\/]view[\\\/]/, "view/").replace(/\.html$/, "");
       let entryName = fileFullName.replace(/view/, "assets/js");
       entryObject[entryName] = fileFullPath.replace(/view/, "assets/js").replace(/html$/, "js");
-      
+
       // 输出文件
       htmlParams.filename = fileFullName + ".html";
       htmlParams.template = fileFullPath;
-      htmlParams.chunks = [entryName];
+      htmlParams.chunks = ["vendors", "commons", entryName];
       plugins.push(new HtmlWebpackPlugin(htmlParams));
     });
   }
@@ -53,14 +59,21 @@ module.exports = {
     publicPath: '/'
   },
   module: {
-    rules: [{
+    rules: [
+      {
         test: /\.css$/,
         use: [
-          'style-loader',
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: path.resolve(__dirname,"dev")
+            }
+          },
           {
             loader: 'css-loader',
             options: { importLoaders: 1 }
-          }, {
+          },
+          {
             loader: 'postcss-loader',
             options: {
               plugins: [
@@ -95,7 +108,17 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        use: ['style-loader', 'css-loader',
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: path.resolve(__dirname,"dev")
+            }
+          },
+          {
+            loader: 'css-loader',
+            options: { importLoaders: 1 }
+          },
           {
             loader: 'postcss-loader',
             options: { plugins: [require('autoprefixer')] }
@@ -104,6 +127,29 @@ module.exports = {
         ]
       }
     ]
+  },
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        vendors: {
+          test: /node_modules/,
+          name: 'vendors',
+          minSize: 30000,
+          minChunks: 1,
+          chunks: 'initial',
+          priority: 1 // 该配置项是设置处理的优先级，数值越大越优先处理
+        },
+        commons: {
+          test: /src[\\/]common/,
+          name: 'commons',
+          minSize: 30000,
+          minChunks: 3,
+          chunks: 'initial',
+          priority: -1,
+          reuseExistingChunk: true // 这个配置允许我们使用已经存在的代码块
+        }
+      }
+    }
   },
   mode: "production"
 };

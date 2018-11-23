@@ -42,28 +42,7 @@ module.exports = merge(common, {
         },
         canPrint: true
       })
-    ],
-    splitChunks: {
-      cacheGroups: {
-        vendors: {
-          test: /node_modules/,
-          name: 'vendors',
-          minSize: 30000,
-          minChunks: 1,
-          chunks: 'initial',
-          priority: 1 // 该配置项是设置处理的优先级，数值越大越优先处理
-        },
-        commons: {
-          test: /src[\\/]common/,
-          name: 'commons',
-          minSize: 30000,
-          minChunks: 3,
-          chunks: 'initial',
-          priority: -1,
-          reuseExistingChunk: true // 这个配置允许我们使用已经存在的代码块
-        }
-      }
-    }
+    ]
   }
 
 });
